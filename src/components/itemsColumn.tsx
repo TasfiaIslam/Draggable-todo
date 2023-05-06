@@ -13,7 +13,13 @@ const ItemsColumn = ({ columnTitle, items }: ItemsColumnProps) => {
       </p>
       <div className="pt-4 flex flex-col gap-y-3">
         {items.map((item, index) => (
-          <Card key={item.id} id={item.id} title={item.title} />
+          <Card
+            key={item.id}
+            draggableId={item.id.toString()}
+            index={index}
+            id={item.id}
+            title={item.title}
+          />
         ))}
       </div>
     </div>
