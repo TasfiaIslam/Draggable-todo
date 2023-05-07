@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import ItemsColumn from "./itemsColumn";
+import Droppable from "./droppable";
 
 interface ITodoItem {
   id: number;
@@ -23,8 +24,10 @@ const initialTodoItems = [
 ];
 
 const TodoList = () => {
-  const [todoItems, setTodoItems] = useState([...initialTodoItems]);
-  const [doneItems, setDoneItems] = useState([]);
+  const [todoItems, setTodoItems] = useState<Array<ITodoItem>>([
+    ...initialTodoItems,
+  ]);
+  const [doneItems, setDoneItems] = useState<Array<ITodoItem>>([]);
 
   const reorder = (
     list: Array<ITodoItem>,
@@ -38,7 +41,7 @@ const TodoList = () => {
     return result;
   };
 
-  const handleRightDraggedItems = (result: DropResult) => {
+  const handleDraggedItems = (result: DropResult) => {
     if (!result.destination) {
       return;
     }
@@ -70,10 +73,57 @@ const TodoList = () => {
         setTodoItems([...reorderedItems]);
       }
     }
-    // DROP TO LEFT : if source droppableId is doneDroppableColumn
-    else {
-      if (source.droppableId === "doneDroppableColumn") {
-        handleRightDraggedItems(result);
+    // REORDER: if source and destination droppable ids are doneDroppableColumn
+    if (sInd === "doneDroppableColumn" && sInd === dInd) {
+      if (destination && sInd === "doneDroppableColumn") {
+        const reorderedItems = reorder(
+          doneItems,
+          source.index,
+          destination.index
+        );
+
+        setDoneItems([...reorderedItems]);
+      }
+    }
+    if (sInd === "todoDroppableColumn" && dInd === "doneDroppableColumn") {
+      // handleDraggedItems(result);
+      if (!result.destination) {
+        return;
+      }
+
+      const itemToDrop = todoItems.find(
+        (item) => item.id.toString() == result.draggableId
+      );
+      //INSERT: dragged item to done list
+      if (itemToDrop) {
+        const doneListItems = Array.from(doneItems);
+        doneListItems.splice(result.destination.index, 0, itemToDrop);
+
+        setDoneItems([...doneListItems]);
+        setTodoItems((current) =>
+          current.filter((item) => item.id !== itemToDrop.id)
+        );
+      }
+    }
+
+    if (sInd === "doneDroppableColumn" && dInd === "todoDroppableColumn") {
+      // handleDraggedItems(result);
+      if (!result.destination) {
+        return;
+      }
+
+      const itemToDrop = doneItems.find(
+        (item) => item.id.toString() == result.draggableId
+      );
+      //INSERT: dragged item to done list
+      if (itemToDrop) {
+        const todoListItems = Array.from(todoItems);
+        todoListItems.splice(result.destination.index, 0, itemToDrop);
+
+        setTodoItems([...todoListItems]);
+        setDoneItems((current) =>
+          current.filter((item) => item.id !== itemToDrop.id)
+        );
       }
     }
   };
