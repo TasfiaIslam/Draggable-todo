@@ -21,6 +21,14 @@ const initialTodoItems = [
     id: 3,
     title: "Bake a cake",
   },
+  {
+    id: 4,
+    title: "Bake a cake",
+  },
+  {
+    id: 5,
+    title: "Bake a cake",
+  },
 ];
 
 const TodoList = () => {
@@ -49,9 +57,6 @@ const TodoList = () => {
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
-
-    console.log({ source });
-    console.log({ destination });
 
     // dropped outside the list
     if (!result.destination) {
@@ -130,11 +135,13 @@ const TodoList = () => {
 
   return (
     <div className="w-[800px] mx-auto">
-      <p className="py-12 text-3xl text-center font-semibold">Todo List </p>
-      <div className="grid grid-cols-2 gap-x-4 justify-between">
+      <p className="py-12 text-3xl text-center font-semibold text-blue-800">
+        Todo List{" "}
+      </p>
+      <div className="grid grid-cols-2  gap-x-4 justify-between">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="todoDroppableColumn">
-            {(provided, snapshot) => (
+            {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
                 <ItemsColumn columnTitle={"Todos"} items={todoItems} />
                 {provided.placeholder}
@@ -142,7 +149,7 @@ const TodoList = () => {
             )}
           </Droppable>
           <Droppable droppableId="doneDroppableColumn">
-            {(provided, snapshot) => (
+            {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
                 <ItemsColumn columnTitle="Done" items={doneItems} />
                 {provided.placeholder}

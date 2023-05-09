@@ -18,7 +18,9 @@ const Card = ({ title, draggableId, index }: CardProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className="px-2 py-4 font-medium w-full h-24 shadow-md shadow-blue-300 rounded-md"
+          className={`${
+            snapshot.isDragging ? "bg-gray-100" : "bg-white"
+          } px-2 py-4 font-medium w-full h-24 shadow-md shadow-blue-300 rounded-md`}
         >
           {title}
         </div>
