@@ -8,34 +8,55 @@ interface ITodoItem {
   title: string;
 }
 
+interface ColumnItem {
+  id: number;
+  title: string;
+  items: {
+    id: number;
+    title: string;
+  }[];
+}
+
 const initialTodoItems = [
   {
     id: 1,
-    title: "Study Geography",
+    title: "Go for a walk",
   },
   {
     id: 2,
-    title: "Water plants",
+    title: "Take a nap",
   },
   {
     id: 3,
-    title: "Bake a cake",
+    title: "Read a book",
   },
   {
     id: 4,
-    title: "Bake a cake",
+    title: "Work out",
   },
   {
     id: 5,
-    title: "Bake a cake",
+    title: "Learn something new",
   },
 ];
 
+const initialColumnData = {
+  todoColumn: {
+    id: 1,
+    title: "To do",
+    items: [...initialTodoItems],
+  },
+  doneColumn: {
+    id: 2,
+    title: "Done",
+    items: [],
+  },
+};
+
+type ColumnType = { [key: string]: ColumnItem };
+
 const TodoList = () => {
-  const [todoItems, setTodoItems] = useState<Array<ITodoItem>>([
-    ...initialTodoItems,
-  ]);
-  const [doneItems, setDoneItems] = useState<Array<ITodoItem>>([]);
+  const [columnData, setColumnData] = useState<ColumnType>(initialColumnData);
 
   const reorder = (
     list: Array<ITodoItem>,
@@ -49,12 +70,6 @@ const TodoList = () => {
     return result;
   };
 
-  const handleDraggedItems = (result: DropResult) => {
-    if (!result.destination) {
-      return;
-    }
-  };
-
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
 
@@ -66,69 +81,51 @@ const TodoList = () => {
     const sInd = source.droppableId;
     const dInd = destination?.droppableId;
 
-    // REORDER: if source and destination droppable ids are todoDroppableColumn
-    if (sInd === "todoDroppableColumn" && sInd === dInd) {
-      if (destination && sInd === "todoDroppableColumn") {
-        const reorderedItems = reorder(
-          todoItems,
-          source.index,
-          destination.index
-        );
+    // REORDER: if source and destination droppable ids are same
+    if (dInd && sInd === dInd) {
+      const column = columnData[sInd];
+      const reorderedItems = reorder(
+        column.items,
+        source.index,
+        destination.index
+      );
 
-        setTodoItems([...reorderedItems]);
-      }
+      setColumnData({
+        ...columnData,
+        [dInd]: {
+          ...column,
+          items: reorderedItems,
+        },
+      });
     }
-    // REORDER: if source and destination droppable ids are doneDroppableColumn
-    if (sInd === "doneDroppableColumn" && sInd === dInd) {
-      if (destination && sInd === "doneDroppableColumn") {
-        const reorderedItems = reorder(
-          doneItems,
-          source.index,
-          destination.index
-        );
 
-        setDoneItems([...reorderedItems]);
-      }
-    }
-    if (sInd === "todoDroppableColumn" && dInd === "doneDroppableColumn") {
-      // handleDraggedItems(result);
-      if (!result.destination) {
-        return;
-      }
+    if (dInd && dInd !== sInd) {
+      const sourceColumn = columnData[sInd];
+      const desColumn = columnData[dInd];
 
-      const itemToDrop = todoItems.find(
+      const itemToDrop = sourceColumn.items.find(
         (item) => item.id.toString() == result.draggableId
       );
-      //INSERT: dragged item to done list
+
+      //INSERT: dragged item to another column
       if (itemToDrop) {
-        const doneListItems = Array.from(doneItems);
-        doneListItems.splice(result.destination.index, 0, itemToDrop);
+        const sourceColumnItems = Array.from(sourceColumn.items);
+        const destColumnItems = Array.from(desColumn.items);
 
-        setDoneItems([...doneListItems]);
-        setTodoItems((current) =>
-          current.filter((item) => item.id !== itemToDrop.id)
-        );
-      }
-    }
+        sourceColumnItems.splice(result.source.index, 1);
+        destColumnItems.splice(result.destination.index, 0, itemToDrop);
 
-    if (sInd === "doneDroppableColumn" && dInd === "todoDroppableColumn") {
-      // handleDraggedItems(result);
-      if (!result.destination) {
-        return;
-      }
-
-      const itemToDrop = doneItems.find(
-        (item) => item.id.toString() == result.draggableId
-      );
-      //INSERT: dragged item to done list
-      if (itemToDrop) {
-        const todoListItems = Array.from(todoItems);
-        todoListItems.splice(result.destination.index, 0, itemToDrop);
-
-        setTodoItems([...todoListItems]);
-        setDoneItems((current) =>
-          current.filter((item) => item.id !== itemToDrop.id)
-        );
+        setColumnData({
+          ...columnData,
+          [sInd]: {
+            ...sourceColumn,
+            items: sourceColumnItems,
+          },
+          [dInd]: {
+            ...desColumn,
+            items: destColumnItems,
+          },
+        });
       }
     }
   };
@@ -136,26 +133,23 @@ const TodoList = () => {
   return (
     <div className="w-[800px] mx-auto">
       <p className="py-12 text-3xl text-center font-semibold text-blue-800">
-        Todo List{" "}
+        Todo List
       </p>
       <div className="grid grid-cols-2  gap-x-4 justify-between">
         <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="todoDroppableColumn">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <ItemsColumn columnTitle={"Todos"} items={todoItems} />
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          <Droppable droppableId="doneDroppableColumn">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <ItemsColumn columnTitle="Done" items={doneItems} />
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+          {Object.entries(columnData).map(([id, column]) => (
+            <Droppable droppableId={id} key={id}>
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  <ItemsColumn
+                    columnTitle={column.title}
+                    items={column.items}
+                  />
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
         </DragDropContext>
       </div>
     </div>
