@@ -8,11 +8,7 @@ interface CardProps {
 }
 const Card = ({ title, draggableId, index }: CardProps) => {
   return (
-    <Draggable
-      draggableId={draggableId}
-      index={index}
-      // isDragDisabled={isDragDisabled}
-    >
+    <Draggable draggableId={draggableId} index={index}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
