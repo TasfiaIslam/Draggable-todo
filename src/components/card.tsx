@@ -22,6 +22,7 @@ const Card = ({ title, draggableId, index }: CardProps) => {
         </div>
       )}
     </Draggable>
+    // <div>{title}</div>
   );
 };
 
