@@ -2,73 +2,14 @@ import { useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import ItemsColumn from "./itemsColumn";
 import Droppable from "./droppable";
-
-interface ITodoItem {
-  id: number;
-  title: string;
-}
-
-interface ColumnItem {
-  id: number;
-  title: string;
-  items: {
-    id: number;
-    title: string;
-  }[];
-}
-
-const initialTodoItems = [
-  {
-    id: 1,
-    title: "Go for a walk",
-  },
-  {
-    id: 2,
-    title: "Take a nap",
-  },
-  {
-    id: 3,
-    title: "Read a book",
-  },
-  {
-    id: 4,
-    title: "Work out",
-  },
-  {
-    id: 5,
-    title: "Learn something new",
-  },
-];
-
-const initialColumnData = {
-  todoColumn: {
-    id: 1,
-    title: "To do",
-    items: [...initialTodoItems],
-  },
-  doneColumn: {
-    id: 2,
-    title: "Done",
-    items: [],
-  },
-};
+import { ColumnItem } from "src/utils/interface";
+import { initialColumnData } from "src/utils/constants";
+import { reorder } from "src/utils/helpers";
 
 type ColumnType = { [key: string]: ColumnItem };
 
 const TodoList = () => {
   const [columnData, setColumnData] = useState<ColumnType>(initialColumnData);
-
-  const reorder = (
-    list: Array<ITodoItem>,
-    startIndex: number,
-    endIndex: number
-  ) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
-  };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
