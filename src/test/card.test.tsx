@@ -1,25 +1,54 @@
-import Card from "../components/card";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import Card from "../components/card";
 import { reorder } from "../utils/helpers";
+
+const MockCardComponent = ({
+  droppableId,
+  draggableId,
+  title,
+  id,
+  index,
+}: {
+  droppableId: string;
+  draggableId: string;
+  title: string;
+  id: number;
+  index: number;
+}) => {
+  return (
+    <DragDropContext onDragEnd={() => {}}>
+      <Droppable droppableId={droppableId} key={droppableId}>
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            <Card
+              title={title}
+              id={id}
+              draggableId={draggableId}
+              index={index}
+            />
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
 
 describe("#Card", () => {
   it("renders card component with expected props", async () => {
     // Render the component
     render(
-      <DragDropContext onDragEnd={() => {}}>
-        <Droppable droppableId={"droppableTestId"} key={"droppableTestId"}>
-          {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              <Card title="title" id={1} draggableId="testId" index={1} />
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <MockCardComponent
+        droppableId={"droppableTestId"}
+        title="Learn testing"
+        id={1}
+        draggableId="testId"
+        index={1}
+      />
     );
-    const headingElement = screen.getByText("title");
+    const headingElement = screen.getByText("Learn testing");
 
     // Assert that the rendered prop matches the expected value
     expect(headingElement).toBeDefined();
@@ -28,20 +57,17 @@ describe("#Card", () => {
   it("renders card component with correct draggable ID", async () => {
     // Render the component
     render(
-      <DragDropContext onDragEnd={() => {}}>
-        <Droppable droppableId={"droppableTestId"} key={"droppableTestId"}>
-          {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              <Card title="title" id={1} draggableId="testId" index={1} />
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <MockCardComponent
+        droppableId={"droppableTestId"}
+        title="task"
+        id={1}
+        draggableId="testId"
+        index={1}
+      />
     );
 
     // Get the card element
-    const cardElement = screen.getByText("title");
+    const cardElement = screen.getByText("task");
 
     // Assert that the card element has the correct draggable ID
     expect(cardElement.getAttribute("data-rbd-draggable-id")).toEqual("testId");
