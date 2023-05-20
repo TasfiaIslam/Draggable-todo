@@ -2,9 +2,10 @@ import { useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import ItemsColumn from "./itemsColumn";
 import Droppable from "./droppable";
-import { ColumnItem } from "src/utils/interface";
-import { initialColumnData } from "src/utils/constants";
+
 import { reorder } from "src/utils/helpers";
+import { initialColumnData } from "src/utils/constants";
+import { ColumnItem } from "src/utils/interface";
 
 type ColumnType = { [key: string]: ColumnItem };
 
